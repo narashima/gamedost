@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Terms & Privacy — GameDost</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080810;
+      --surface: #111120;
+      --surface2: #181828;
+      --accent: #ff4d6d;
+      --accent2: #ffd166;
+      --text: #f0f0f8;
+      --muted: #6b6b88;
+      --border: rgba(255,255,255,0.07);
+      --radius: 14px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.7;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 10% 10%, rgba(255,77,109,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 90% 80%, rgba(99,102,241,0.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* HEADER */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8,8,16,0.9);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .logo-dot {
+      width: 9px; height: 9px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100%{opacity:1;transform:scale(1);}
+      50%{opacity:0.5;transform:scale(0.8);}
+    }
+
+    .logo span { color: var(--text); }
+    .logo em { color: var(--accent); font-style: normal; }
+
+    header a.back {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      border: 1px solid var(--border);
+      padding: 7px 16px;
+      border-radius: 99px;
+      transition: all 0.2s;
+    }
+    header a.back:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+    /* PAGE HERO */
+    .page-hero {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 56px 24px 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .page-tag {
+      display: inline-block;
+      background: rgba(255,77,109,0.1);
+      border: 1px solid rgba(255,77,109,0.2);
+      color: var(--accent);
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 99px;
+      margin-bottom: 16px;
+    }
+
+    .page-hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+
+    .page-hero p {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* CONTENT */
+    .content {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    .section-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+
+    .section-block h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent2);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-block p {
+      color: #b0b0c8;
+      font-size: 0.92rem;
+      margin-bottom: 12px;
+    }
+
+    .section-block p:last-child { margin-bottom: 0; }
+
+    .section-block ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 8px;
+    }
+
+    .section-block ul li {
+      color: #b0b0c8;
+      font-size: 0.92rem;
+      padding: 5px 0 5px 18px;
+      position: relative;
+    }
+
+    .section-block ul li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 0.8rem;
+    }
+
+    .highlight-box {
+      background: rgba(255,77,109,0.06);
+      border: 1px solid rgba(255,77,109,0.15);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 14px;
+      color: #c8a0a8;
+      font-size: 0.88rem;
+    }
+
+    .highlight-box strong { color: var(--accent); }
+
+    a { color: var(--accent2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* FOOTER */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    footer .footer-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+    }
+    footer .footer-logo em { color: var(--accent); font-style: normal; }
+    footer p { color: var(--muted); font-size: 0.8rem; }
+    footer nav a { color: var(--muted); font-size: 0.8rem; margin-left: 16px; text-decoration: none; transition: color 0.2s; }
+    footer nav a:hover { color: var(--text); }
+
+    @media(max-width:600px){
+      header { padding: 0 16px; }
+      .section-block { padding: 20px 18px; }
+      footer { flex-direction: column; text-align: center; }
+      footer nav a { margin: 0 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <a class="logo" href="index.html">
+      <span class="logo-dot"></span>
+      <span>Game<em>Dost</em></span>
+    </a>
+    <a class="back" href="index.html">← Back to Games</a>
+  </header>
+
+  <!-- HERO -->
+  <div class="page-hero">
+    <div class="page-tag">Legal</div>
+    <h1>Terms & Privacy</h1>
+    <p>Last updated: March 2026</p>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- INTRO -->
+    <div class="section-block">
+      <h2>👋 Hello from GameDost</h2>
+      <p>GameDost is a free browser-based game portal built for players worldwide. All games on this site are free to play — no login, no registration, no download required.</p>
+      <p>You are not required to enter any personal information to play. We keep things simple and honest.</p>
+      <div class="highlight-box">
+        <strong>Thank you</strong> for not blocking ads when using GameDost. Ads are how we keep the games free and the site running for everyone. 🙏
+      </div>
+    </div>
+
+    <!-- WHAT WE COLLECT -->
+    <div class="section-block">
+      <h2>🔒 What We Collect</h2>
+      <p>GameDost does <strong style="color:#fff;">not</strong> collect or store any personally identifiable information about you. There are no sign-up forms, no accounts, and no user profiles.</p>
+      <p>The only data that may be stored is basic game progress (e.g. your score or level) saved locally in your browser — this stays on your device and is never sent to us.</p>
+      <p>If you contact us by email, you give us permission to store and use that message to respond to your query.</p>
+    </div>
+
+    <!-- COOKIES -->
+    <div class="section-block">
+      <h2>🍪 Cookies</h2>
+      <p>You must accept cookies to use GameDost. Cookies are used to make games work properly and to remember things like your score or game progress.</p>
+      <p>Cookies are also used by our third-party service providers including Google and Meta (Facebook) for advertising and analytics purposes.</p>
+      <ul>
+        <li>Google uses cookies to serve ads and measure site performance</li>
+        <li>Facebook may use cookies if you interact with social sharing features</li>
+        <li>Cloudflare may use cookies to keep the site secure and fast</li>
+      </ul>
+      <p style="margin-top:12px;">To manage your ad preferences, visit: <a href="https://adssettings.google.com/" target="_blank">adssettings.google.com</a></p>
+      <p>To learn how Google uses data from sites like ours: <a href="https://policies.google.com/technologies/partner-sites" target="_blank">policies.google.com/technologies/partner-sites</a></p>
+    </div>
+
+    <!-- THIRD PARTY CONTENT -->
+    <div class="section-block">
+      <h2>🎮 Third-Party Games & Content</h2>
+      <p>Some games on GameDost are provided by third-party game platforms (such as Playgama). These games are embedded on our site but hosted and operated by their respective providers.</p>
+      <p>GameDost is not responsible for the content, data practices, or privacy policies of these third-party games. We recommend reviewing the privacy policies of those providers.</p>
+      <ul>
+        <li>Third-party games may collect their own usage data</li>
+        <li>Ads shown inside embedded games are managed by the game provider</li>
+        <li>GameDost earns a share of revenue from ads shown inside embedded games</li>
+      </ul>
+    </div>
+
+    <!-- ADS -->
+    <div class="section-block">
+      <h2>📢 Advertising</h2>
+      <p>GameDost is a free service supported by advertising. Ads may appear on the site and inside games. These ads are served by Google AdSense and by game providers like Playgama.</p>
+      <p>We do not control which specific ads are shown. Ads are matched to your general interests based on cookies and browsing data as described in Google's privacy policy.</p>
+      <div class="highlight-box">
+        <strong>Note:</strong> GameDost does not sell your personal data to advertisers. Ad targeting is handled entirely by Google's systems.
+      </div>
+    </div>
+
+    <!-- CHILDREN -->
+    <div class="section-block">
+      <h2>👶 Children's Privacy</h2>
+      <p>GameDost does not knowingly collect any personal information from children under the age of 13. Our games are designed for general audiences.</p>
+      <p>If you are a parent or guardian and believe your child has provided us with any personal information, please contact us immediately and we will delete it.</p>
+    </div>
+
+    <!-- TERMS OF USE -->
+    <div class="section-block">
+      <h2>📋 Terms of Use</h2>
+      <p>By using GameDost, you agree to the following:</p>
+      <ul>
+        <li>All games and content on this site are free to use for personal, non-commercial enjoyment</li>
+        <li>You may not copy, redistribute, or embed our site's games or code without permission</li>
+        <li>Do not attempt to interfere with or disrupt the website or its services</li>
+        <li>GameDost may update, change, or remove games and features at any time</li>
+        <li>We are not responsible for any loss or damage arising from your use of the site</li>
+        <li>Using GameDost does not give you ownership of any intellectual property on the site</li>
+        <li>All games remain the property of their respective developers and publishers</li>
+      </ul>
+      <p style="margin-top:14px;">GameDost is provided "as is" without any warranties. We do our best to keep the site running and games playable, but we cannot guarantee uninterrupted service.</p>
+    </div>
+
+    <!-- LINKS -->
+    <div class="section-block">
+      <h2>🔗 Links to Other Sites</h2>
+      <p>GameDost may contain links to external websites. These are not operated by us and we are not responsible for their content or privacy practices. We recommend reading the privacy policy of any external site you visit.</p>
+    </div>
+
+    <!-- CHANGES -->
+    <div class="section-block">
+      <h2>✏️ Changes to This Policy</h2>
+      <p>We may update these terms from time to time. Continued use of GameDost after any changes means you accept the updated terms. The date at the top of this page will reflect the latest update.</p>
+    </div>
+
+    <!-- CONTACT -->
+    <div class="section-block">
+      <h2>📬 Contact Us</h2>
+      <p>Have a question, suggestion, or concern? We'd love to hear from you.</p>
+      <p>Email us at: <a href="/cdn-cgi/l/email-protection#aac4cbd8cbd9c2c3c7cb9b999a93eacdc7cbc3c684c9c5c7"><span class="__cf_email__" data-cfemail="3e505f4c5f4d5657535f0f0d0e077e59535f5752105d5153">[email&#160;protected]</span></a></p>
+      <div class="highlight-box">
+        <strong>Game not working?</strong> Some games require a stable internet connection and an updated browser. Try refreshing the page or switching to Chrome or Firefox.
+      </div>
+    </div
