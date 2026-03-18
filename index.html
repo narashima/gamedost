@@ -345,13 +345,16 @@
     .fs-overlay {
       display: none;
       position: fixed;
-      inset: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%;
+      height: 100%;
       background: #080810;
       z-index: 9999;
       flex-direction: column;
       align-items: center;
       overflow: hidden;
       touch-action: none;
+      -webkit-overflow-scrolling: none;
     }
     .fs-overlay.active { display: flex; }
 
@@ -360,10 +363,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 16px;
+      padding: 12px 16px;
       background: rgba(8,8,16,0.98);
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
+      min-height: 54px;
     }
 
     .fs-title {
@@ -376,12 +380,13 @@
       background: var(--surface2);
       border: 1px solid var(--border);
       color: var(--text);
-      width: 34px; height: 34px;
+      width: 36px; height: 36px;
       border-radius: 50%;
       font-size: 1.1rem;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .fs-score { font-size: 0.8rem; color: var(--muted); }
@@ -390,23 +395,82 @@
     .fs-body {
       flex: 1;
       width: 100%;
+      height: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 12px;
+      padding: 16px 12px;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    /* LOADING BAR */
+    .fs-loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      height: 100%;
+      width: 100%;
+    }
+
+    .fs-loader-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .fs-loader-bar-wrap {
+      width: 200px;
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 99px;
       overflow: hidden;
     }
 
+    .fs-loader-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ff4d6d, #ffd166);
+      border-radius: 99px;
+      animation: loadbar 1.2s ease forwards;
+    }
+
+    @keyframes loadbar {
+      0%   { width: 0%; }
+      40%  { width: 60%; }
+      80%  { width: 85%; }
+      100% { width: 100%; }
+    }
+
+    .fs-loader-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .fs-loader-dots span {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: dotbounce 0.9s infinite ease-in-out;
+    }
+
+    .fs-loader-dots span:nth-child(2) { animation-delay: 0.15s; background: #f09020; }
+    .fs-loader-dots span:nth-child(3) { animation-delay: 0.3s; background: var(--accent2); }
+
     .fs-restart {
-      margin-top: 14px;
+      margin-top: 16px;
       border: none;
-      padding: 9px 28px;
+      padding: 10px 30px;
       border-radius: 99px;
       font-family: 'DM Sans', sans-serif;
       font-size: 0.85rem;
       cursor: pointer;
       font-weight: 600;
+      flex-shrink: 0;
     }
   </style>
 </head>
@@ -554,15 +618,23 @@
     currentGame = gameId;
     document.getElementById('fsTitle').textContent = title;
     document.getElementById('fsScore').innerHTML = '';
-    document.getElementById('fsBody').innerHTML = '';
+    document.getElementById('fsBody').innerHTML =
+      '<div class="fs-loader">' +
+        '<div class="fs-loader-title">Loading ' + title + '</div>' +
+        '<div class="fs-loader-bar-wrap"><div class="fs-loader-bar"></div></div>' +
+        '<div class="fs-loader-dots"><span></span><span></span><span></span></div>' +
+      '</div>';
     document.getElementById('fsOverlay').classList.add('active');
     document.body.style.overflow = 'hidden';
-    if(gameId === 'snake') buildSnakeFS();
-    if(gameId === '2048') build2048FS();
-    if(gameId === 'ttt') buildTTTFS();
-    if(gameId === 'memory') buildMemoryFS();
-    if(gameId === 'reaction') buildReactionFS();
-    if(gameId === 'guess') buildGuessFS();
+    // Show loader for exactly 1.2s (matches bar animation) then launch game
+    setTimeout(function() {
+      if(gameId === 'snake') buildSnakeFS();
+      else if(gameId === '2048') build2048FS();
+      else if(gameId === 'ttt') buildTTTFS();
+      else if(gameId === 'memory') buildMemoryFS();
+      else if(gameId === 'reaction') buildReactionFS();
+      else if(gameId === 'guess') buildGuessFS();
+    }, 1200);
   }
 
   function closeFullscreen() {
@@ -588,10 +660,10 @@
       '<button class="fs-restart" onclick="buildSnakeFS()" style="background:#ff4d6d;color:#fff;margin-top:12px;">Restart</button>';
 
     snakeCanvas = document.getElementById('snakeCanvas');
-    var size = Math.min(window.innerWidth, window.innerHeight) - 120;
-    size = Math.min(size, 360);
+    var maxSize = Math.min(body.offsetWidth - 24, body.offsetHeight - 80, 360);
+    if(maxSize < 100) maxSize = Math.min(window.innerWidth - 24, window.innerHeight - 140, 360);
     snakeCOLS = 15; snakeROWS = 15;
-    snakeS = Math.floor(size / snakeCOLS);
+    snakeS = Math.floor(maxSize / snakeCOLS);
     snakeCanvas.width = snakeCOLS * snakeS;
     snakeCanvas.height = snakeROWS * snakeS;
     snakeCtx = snakeCanvas.getContext('2d');
@@ -600,8 +672,7 @@
     snake = [{x:7,y:7},{x:6,y:7},{x:5,y:7}];
     dir = {x:1,y:0};
     snakeScoreVal = 0;
-    document.getElementById('fsScore').innerHTML = 'Score: <strong>' + snakeScoreVal + '</strong>';
-
+    document.getElementById('fsScore').innerHTML = 'Score: <strong>0</strong>';
     snakePlaceFood();
     snakeDraw();
     snakeInterval = setInterval(snakeTick, 150);
@@ -977,366 +1048,6 @@
     }
     tsx=null;
   },{passive:false});
-  </script>
-
-  // ══════════════════════════════
-  // 1. SNAKE
-  // ══════════════════════════════
-  var snakeInterval, snake, dir, food, snakeScoreVal;
-  var snakeCtx, snakeCanvas, snakeCOLS, snakeROWS, snakeS;
-
-  function startSnake() {
-    showGame('snakeThumb','snakeContainer');
-    snakeCanvas = document.getElementById('snakeCanvas');
-    var container = snakeCanvas.parentElement;
-    var size = Math.min(container.offsetWidth - 16, 260);
-    snakeCOLS = 13; snakeROWS = 13;
-    snakeS = Math.floor(size / snakeCOLS);
-    snakeCanvas.width = snakeCOLS * snakeS;
-    snakeCanvas.height = snakeROWS * snakeS;
-    snakeCtx = snakeCanvas.getContext('2d');
-    clearInterval(snakeInterval);
-    snake = [{x:6,y:6},{x:5,y:6},{x:4,y:6}];
-    dir = {x:1,y:0};
-    snakeScoreVal = 0;
-    document.getElementById('snakeScore').textContent = 0;
-    snakePlaceFood();
-    snakeDraw();
-    snakeInterval = setInterval(snakeTick, 160);
-  }
-
-  function snakePlaceFood() {
-    do { food={x:Math.floor(Math.random()*snakeCOLS),y:Math.floor(Math.random()*snakeROWS)}; }
-    while(snake.some(function(s){return s.x===food.x&&s.y===food.y;}));
-  }
-
-  function snakeDraw() {
-    var ctx=snakeCtx, S=snakeS;
-    ctx.fillStyle='#0d0d1a'; ctx.fillRect(0,0,snakeCanvas.width,snakeCanvas.height);
-    ctx.fillStyle='#ffd166';
-    ctx.beginPath(); ctx.arc(food.x*S+S/2,food.y*S+S/2,S/2-2,0,Math.PI*2); ctx.fill();
-    for(var k=0;k<snake.length;k++){
-      ctx.fillStyle = k===0?'#ff4d6d':'hsl('+(148+k*3)+',60%,'+(46-k)+'%)';
-      ctx.beginPath();
-      ctx.roundRect(snake[k].x*S+1,snake[k].y*S+1,S-2,S-2,3);
-      ctx.fill();
-    }
-  }
-
-  function snakeTick() {
-    var head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
-    if(head.x<0||head.x>=snakeCOLS||head.y<0||head.y>=snakeROWS||
-       snake.some(function(s){return s.x===head.x&&s.y===head.y;})){
-      clearInterval(snakeInterval);
-      var ctx=snakeCtx;
-      ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,snakeCanvas.width,snakeCanvas.height);
-      ctx.fillStyle='#fff'; ctx.font='bold 14px sans-serif'; ctx.textAlign='center';
-      ctx.fillText('Game Over!',snakeCanvas.width/2,snakeCanvas.height/2-8);
-      ctx.font='12px sans-serif';
-      ctx.fillText('Score: '+snakeScoreVal,snakeCanvas.width/2,snakeCanvas.height/2+12);
-      return;
-    }
-    snake.unshift(head);
-    if(head.x===food.x&&head.y===food.y){
-      snakeScoreVal+=10;
-      document.getElementById('snakeScore').textContent=snakeScoreVal;
-      snakePlaceFood();
-    } else { snake.pop(); }
-    snakeDraw();
-  }
-
-  // ══════════════════════════════
-  // 2. 2048
-  // ══════════════════════════════
-  var board2048=null, score2048=0;
-  var TC={0:'#1a1a2e',2:'#2a2a4a',4:'#3a2a5a',8:'#c84b31',16:'#e05c2a',32:'#e8762a',64:'#f09020',128:'#ffd166',256:'#ffbe00',512:'#f4a261',1024:'#e76f51',2048:'#ff4d6d'};
-  var TT={0:'transparent',2:'#ccc',4:'#ddd',8:'#fff',16:'#fff',32:'#fff',64:'#fff',128:'#111',256:'#111',512:'#111',1024:'#fff',2048:'#fff'};
-
-  function start2048(){
-    showGame('t2048Thumb','t2048Container');
-    board2048=[[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
-    score2048=0; document.getElementById('t2048Score').textContent=0;
-    addT(); addT(); renderT();
-  }
-
-  function addT(){
-    var e=[];
-    for(var r=0;r<4;r++) for(var c=0;c<4;c++) if(board2048[r][c]===0) e.push([r,c]);
-    if(!e.length) return;
-    var p=e[Math.floor(Math.random()*e.length)];
-    board2048[p[0]][p[1]]=Math.random()<0.9?2:4;
-  }
-
-  function renderT(){
-    var b=document.getElementById('t2048Board'); b.innerHTML='';
-    var bw=b.offsetWidth||200;
-    var cw=Math.floor((bw-5*5)/4);
-    for(var r=0;r<4;r++) for(var c=0;c<4;c++){
-      var v=board2048[r][c];
-      var d=document.createElement('div');
-      d.style.cssText='width:'+cw+'px;height:'+cw+'px;border-radius:6px;background:'+(TC[v]||'#ff4d6d')+
-        ';display:flex;align-items:center;justify-content:center;font-weight:800;font-size:'+(v>=1024?'0.65rem':v>=100?'0.78rem':'0.95rem')+
-        ';color:'+(TT[v]||'#fff')+';';
-      d.textContent=v||''; b.appendChild(d);
-    }
-  }
-
-  function slideT(row){
-    var f=row.filter(function(v){return v!==0;});
-    for(var i=0;i<f.length-1;i++) if(f[i]===f[i+1]){f[i]*=2;score2048+=f[i];f.splice(i+1,1);}
-    while(f.length<4) f.push(0); return f;
-  }
-
-  function moveT(d){
-    if(!board2048) return;
-    var b=JSON.stringify(board2048);
-    if(d==='left') board2048=board2048.map(function(r){return slideT(r);});
-    else if(d==='right') board2048=board2048.map(function(r){return slideT(r.slice().reverse()).reverse();});
-    else for(var c=0;c<4;c++){
-      var col=[board2048[0][c],board2048[1][c],board2048[2][c],board2048[3][c]];
-      if(d==='down') col.reverse();
-      col=slideT(col); if(d==='down') col.reverse();
-      for(var r=0;r<4;r++) board2048[r][c]=col[r];
-    }
-    if(JSON.stringify(board2048)!==b) addT();
-    document.getElementById('t2048Score').textContent=score2048;
-    renderT();
-    if(board2048.some(function(r){return r.some(function(v){return v===2048;});}))
-      setTimeout(function(){alert('You reached 2048!');},100);
-  }
-
-  // ══════════════════════════════
-  // 3. TIC TAC TOE
-  // ══════════════════════════════
-  var tttBoard, tttTurn, tttOver;
-  var tttWins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-
-  function startTTT(){
-    showGame('tttThumb','tttContainer');
-    tttBoard=Array(9).fill(''); tttTurn='X'; tttOver=false;
-    document.getElementById('tttStatus').textContent='Your turn (X)';
-    var b=document.getElementById('tttBoard'); b.innerHTML='';
-    var cw=Math.floor((Math.min(b.parentElement.offsetWidth-16,200)-2*6)/3);
-    for(var i=0;i<9;i++){
-      var cell=document.createElement('div');
-      cell.style.cssText='width:'+cw+'px;height:'+cw+'px;border-radius:8px;background:#1a1a2e;border:1px solid #2a2a4a;display:flex;align-items:center;justify-content:center;font-family:Syne,sans-serif;font-size:1.4rem;font-weight:800;cursor:pointer;';
-      cell.dataset.i=i;
-      cell.onclick=function(){tttClick(parseInt(this.dataset.i));};
-      b.appendChild(cell);
-    }
-  }
-
-  function tttClick(i){
-    if(tttOver||tttBoard[i]) return;
-    tttBoard[i]=tttTurn;
-    var cells=document.getElementById('tttBoard').children;
-    cells[i].textContent=tttTurn;
-    cells[i].style.color=tttTurn==='X'?'#ff4d6d':'#ffd166';
-    var winner=tttCheckWin();
-    if(winner){
-      document.getElementById('tttStatus').textContent=winner==='Draw'?'Draw!':winner+' Wins! 🎉';
-      tttOver=true; return;
-    }
-    tttTurn=tttTurn==='X'?'O':'X';
-    document.getElementById('tttStatus').textContent='Turn: '+tttTurn;
-    if(tttTurn==='O') setTimeout(tttAI,350);
-  }
-
-  function tttAI(){
-    var empty=[];
-    for(var i=0;i<9;i++) if(!tttBoard[i]) empty.push(i);
-    if(!empty.length) return;
-    for(var w=0;w<tttWins.length;w++){
-      var ln=tttWins[w],vals=ln.map(function(x){return tttBoard[x];});
-      if(vals.filter(function(v){return v==='O';}).length===2&&vals.includes(''))
-        {tttClick(ln[vals.indexOf('')]); return;}
-    }
-    for(var w=0;w<tttWins.length;w++){
-      var ln=tttWins[w],vals=ln.map(function(x){return tttBoard[x];});
-      if(vals.filter(function(v){return v==='X';}).length===2&&vals.includes(''))
-        {tttClick(ln[vals.indexOf('')]); return;}
-    }
-    tttClick(!tttBoard[4]?4:empty[Math.floor(Math.random()*empty.length)]);
-  }
-
-  function tttCheckWin(){
-    for(var w=0;w<tttWins.length;w++){
-      var ln=tttWins[w];
-      if(tttBoard[ln[0]]&&tttBoard[ln[0]]===tttBoard[ln[1]]&&tttBoard[ln[1]]===tttBoard[ln[2]])
-        return tttBoard[ln[0]];
-    }
-    if(tttBoard.every(function(v){return v!=='';})) return 'Draw';
-    return null;
-  }
-
-  // ══════════════════════════════
-  // 4. MEMORY MATCH
-  // ══════════════════════════════
-  var memCards,memFlipped,memMatched,memMovesCount,memLock;
-  var memEmojis=['🍕','🎸','🚀','🌈','🦊','🎃','💎','🌊'];
-
-  function startMemory(){
-    showGame('memThumb','memContainer');
-    var deck=memEmojis.concat(memEmojis);
-    deck.sort(function(){return Math.random()-0.5;});
-    memCards=deck; memFlipped=[]; memMatched=0; memMovesCount=0; memLock=false;
-    document.getElementById('memPairs').textContent=0;
-    document.getElementById('memMoves').textContent=0;
-    var b=document.getElementById('memBoard'); b.innerHTML='';
-    var bw=b.offsetWidth||200;
-    var cw=Math.floor((bw-3*5)/4);
-    deck.forEach(function(emoji,i){
-      var card=document.createElement('div');
-      card.style.cssText='width:'+cw+'px;height:'+cw+'px;border-radius:8px;background:#1a1a2e;border:1px solid #2a2a4a;display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;';
-      card.dataset.i=i; card.dataset.emoji=emoji;
-      card.onclick=function(){memFlip(this);};
-      b.appendChild(card);
-    });
-  }
-
-  function memFlip(card){
-    if(memLock||card.textContent!==''||memFlipped.length>=2) return;
-    card.textContent=card.dataset.emoji; card.style.background='#2a2a4a';
-    memFlipped.push(card);
-    if(memFlipped.length===2){
-      memMovesCount++; document.getElementById('memMoves').textContent=memMovesCount;
-      if(memFlipped[0].dataset.emoji===memFlipped[1].dataset.emoji){
-        memMatched++; document.getElementById('memPairs').textContent=memMatched;
-        memFlipped[0].style.background='rgba(255,77,109,0.2)';
-        memFlipped[1].style.background='rgba(255,77,109,0.2)';
-        memFlipped=[];
-        if(memMatched===8) setTimeout(function(){alert('You won in '+memMovesCount+' moves!');},200);
-      } else {
-        memLock=true;
-        setTimeout(function(){
-          memFlipped[0].textContent=''; memFlipped[0].style.background='#1a1a2e';
-          memFlipped[1].textContent=''; memFlipped[1].style.background='#1a1a2e';
-          memFlipped=[]; memLock=false;
-        },900);
-      }
-    }
-  }
-
-  // ══════════════════════════════
-  // 5. REACTION TEST
-  // ══════════════════════════════
-  var reactState='idle',reactTimer=null,reactStart=null,reactBestTime=null;
-
-  function startReaction(){
-    showGame('reactThumb','reactContainer');
-    reactState='idle';
-    var box=document.getElementById('reactBox');
-    box.style.background='#1a1a2e'; box.style.borderColor='#333';
-    document.getElementById('reactText').style.color='#555';
-    document.getElementById('reactText').textContent='Tap to Start';
-  }
-
-  function handleReaction(){
-    if(reactState==='idle'){
-      reactState='waiting';
-      document.getElementById('reactText').textContent='Wait for green...';
-      document.getElementById('reactText').style.color='#ffd166';
-      document.getElementById('reactBox').style.background='#1a0808';
-      reactTimer=setTimeout(function(){
-        reactState='go';
-        document.getElementById('reactBox').style.background='#0a2a0a';
-        document.getElementById('reactBox').style.borderColor='#4caf50';
-        document.getElementById('reactText').textContent='TAP NOW!';
-        document.getElementById('reactText').style.color='#4caf50';
-        reactStart=Date.now();
-      },1500+Math.random()*3000);
-    } else if(reactState==='waiting'){
-      clearTimeout(reactTimer); reactState='idle';
-      document.getElementById('reactBox').style.borderColor='#ff4d6d';
-      document.getElementById('reactText').textContent='Too early! Try again';
-      document.getElementById('reactText').style.color='#ff4d6d';
-      setTimeout(function(){
-        document.getElementById('reactBox').style.background='#1a1a2e';
-        document.getElementById('reactBox').style.borderColor='#333';
-        document.getElementById('reactText').textContent='Tap to Start';
-        document.getElementById('reactText').style.color='#555';
-      },1200);
-    } else if(reactState==='go'){
-      var ms=Date.now()-reactStart; reactState='idle';
-      if(!reactBestTime||ms<reactBestTime) reactBestTime=ms;
-      document.getElementById('reactBox').style.background='#1a1a2e';
-      document.getElementById('reactBox').style.borderColor='#ffd166';
-      document.getElementById('reactText').textContent=ms+'ms — tap to retry';
-      document.getElementById('reactText').style.color='#ffd166';
-      document.getElementById('reactBest').textContent='Best: '+reactBestTime+'ms';
-    }
-  }
-
-  // ══════════════════════════════
-  // 6. NUMBER GUESS
-  // ══════════════════════════════
-  var guessSecret=null, guessTries=0;
-
-  function startGuess(){
-    showGame('guessThumb','guessContainer');
-    guessSecret=Math.floor(Math.random()*100)+1;
-    guessTries=0;
-    document.getElementById('guessTries').textContent=0;
-    document.getElementById('guessHint').textContent='Guess 1–100';
-    document.getElementById('guessHint').style.color='#ffd166';
-    document.getElementById('guessMsg').textContent='';
-    document.getElementById('guessInput').value='';
-    document.getElementById('guessInput').disabled=false;
-  }
-
-  function checkGuess(){
-    var val=parseInt(document.getElementById('guessInput').value);
-    if(!val||val<1||val>100){
-      document.getElementById('guessMsg').textContent='Enter a number 1-100';
-      return;
-    }
-    guessTries++;
-    document.getElementById('guessTries').textContent=guessTries;
-    document.getElementById('guessInput').value='';
-    if(val===guessSecret){
-      document.getElementById('guessHint').textContent='Correct!';
-      document.getElementById('guessHint').style.color='#4caf50';
-      document.getElementById('guessMsg').textContent='Got it in '+guessTries+' tries!';
-      document.getElementById('guessInput').disabled=true;
-    } else {
-      document.getElementById('guessHint').textContent=val<guessSecret?'Too low ↑':'Too high ↓';
-      document.getElementById('guessHint').style.color=val<guessSecret?'#ff4d6d':'#ffd166';
-      document.getElementById('guessMsg').textContent=val<guessSecret?'Try higher!':'Try lower!';
-    }
-  }
-
-  // ══════════════════════════════
-  // KEYBOARD + TOUCH CONTROLS
-  // ══════════════════════════════
-  document.addEventListener('keydown',function(e){
-    var sm={ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0}};
-    if(sm[e.key]&&dir){
-      var n=sm[e.key];
-      if(n.x!==-dir.x||n.y!==-dir.y) dir=n;
-      e.preventDefault();
-    }
-    var tm={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'};
-    if(tm[e.key]&&board2048){ e.preventDefault(); moveT(tm[e.key]); }
-    if(e.key==='Enter'&&guessSecret) checkGuess();
-  });
-
-  var tsx=null,tsy=null;
-  document.addEventListener('touchstart',function(e){
-    tsx=e.touches[0].clientX; tsy=e.touches[0].clientY;
-  },{passive:true});
-
-  document.addEventListener('touchend',function(e){
-    if(tsx===null) return;
-    var dx=e.changedTouches[0].clientX-tsx, dy=e.changedTouches[0].clientY-tsy;
-    if(Math.max(Math.abs(dx),Math.abs(dy))<25){tsx=null;return;}
-    var h=Math.abs(dx)>Math.abs(dy);
-    if(dir){
-      if(h){if(dx>0&&dir.x!==-1)dir={x:1,y:0};else if(dx<0&&dir.x!==1)dir={x:-1,y:0};}
-      else{if(dy>0&&dir.y!==-1)dir={x:0,y:1};else if(dy<0&&dir.y!==1)dir={x:0,y:-1};}
-    }
-    if(board2048){if(h)moveT(dx>0?'right':'left');else moveT(dy>0?'down':'up');}
-    tsx=null;
-  },{passive:true});
   </script>
 
 </body>
